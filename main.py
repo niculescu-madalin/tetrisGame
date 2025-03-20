@@ -3,13 +3,14 @@ import random
 import pygame
 from pygame.locals import *
 import colors
+import shapes
 
 pygame.init()
 
-FPS = 60
-FramePerSec = pygame.time.Clock()
+# FPS = 60
+# FramePerSec = pygame.time.Clock()
 
-SCREEN_WIDTH = 800
+SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 700
 
 GRID_COLS = 10
@@ -22,66 +23,29 @@ PLAY_OFFSET_X = (SCREEN_WIDTH - PLAY_WIDTH) // 2
 PLAY_OFFSET_Y = (SCREEN_HEIGHT - PLAY_HEIGHT) // 2
 
 
-# Shapes and their rotations
-SHAPES = [
-    {  # I
-        'rotations': [
-            [(-1, 0), (0, 0), (1, 0), (2, 0)],
-            [(0, -1), (0, 0), (0, 1), (0, 2)]
-        ],
-        'color': colors.CYAN
-    },
-    {  # O
-        'rotations': [
-            [(0, 0), (1, 0), (0, 1), (1, 1)]
-        ],
-        'color': colors.YELLOW
-    },
-    {  # T
-        'rotations': [
-            [(-1, 0), (0, 0), (1, 0), (0, 1)],
-            [(0, -1), (0, 0), (0, 1), (-1, 0)],
-            [(-1, 0), (0, 0), (1, 0), (0, -1)],
-            [(0, -1), (0, 0), (0, 1), (1, 0)]
-        ],
-        'color': colors.PURPLE
-    },
-    {  # L
-        'rotations': [
-            [(-1, 0), (0, 0), (1, 0), (1, 1)],
-            [(0, -1), (0, 0), (0, 1), (1, -1)],
-            [(-1, -1), (-1, 0), (0, 0), (1, 0)],
-            [(-1, 1), (0, -1), (0, 0), (0, 1)]
-        ],
-        'color': colors.ORANGE
-    },
-    {  # J
-        'rotations': [
-            [(-1, 0), (0, 0), (1, 0), (-1, 1)],
-            [(0, -1), (0, 0), (0, 1), (1, 1)],
-            [(1, -1), (-1, 0), (0, 0), (1, 0)],
-            [(-1, -1), (0, -1), (0, 0), (0, 1)]
-        ],
-        'color': colors.BLUE
-    },
-    {  # S
-        'rotations': [
-            [(-1, 0), (0, 0), (0, 1), (1, 1)],
-            [(0, -1), (0, 0), (-1, 0), (-1, 1)]
-        ],
-        'color': colors.GREEN
-    },
-    {  # Z
-        'rotations': [
-            [(-1, 1), (0, 1), (0, 0), (1, 0)],
-            [(0, -1), (0, 0), (1, 0), (1, 1)]
-        ],
-        'color': colors.RED
-    }
-]
+# Game state
+current_grid_x = 0
+current_grid_y = 0
 
-screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
-pygame.display.set_caption("Tetris")
+
+def checkCollision(x, y) -> bool:
+    new_x = x + 1
+    new_y = y + 1
+    if new_x <= 0 or new_x > GRID_COLS or new_y > GRID_ROWS:
+        return True
+    if new_y <= 0:
+        return True
+    return False
+
+
+def move(dx, dy):
+    global current_grid_x, current_grid_y
+    new_x = current_grid_x + dx
+    new_y = current_grid_y + dy
+    if not checkCollision(new_x, new_y):
+        current_grid_x = new_x
+        current_grid_y = new_y
+
 
 
 def drawGrid():
@@ -100,14 +64,18 @@ def drawGrid():
                 BLOCK_SIZE - BLOCK_GAP
             ))
 
+
 def drawPieces():
     pygame.draw.rect(screen, colors.YELLOW, (
-        PLAY_OFFSET_X + BLOCK_GAP,
-        PLAY_OFFSET_Y + BLOCK_GAP,
+        PLAY_OFFSET_X + BLOCK_GAP + current_grid_x * BLOCK_SIZE,
+        PLAY_OFFSET_Y + BLOCK_GAP + current_grid_y * BLOCK_SIZE,
         BLOCK_SIZE - BLOCK_GAP,
         BLOCK_SIZE - BLOCK_GAP
     ))
 
+
+screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
+pygame.display.set_caption("Tetris")
 
 running = True
 while running:
@@ -122,6 +90,14 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 running = False
+            if event.key == pygame.K_LEFT:
+                move(-1, 0)
+            elif event.key == pygame.K_RIGHT:
+                move(1, 0)
+            elif event.key == pygame.K_DOWN:
+                move(0, 1)
+            elif event.key == pygame.K_UP:
+                move(0, -1)
 
     # Flip the display
     pygame.display.update()
