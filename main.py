@@ -1,5 +1,6 @@
 import sys
 import random
+import time
 import pygame
 from pygame.locals import *
 import colors
@@ -7,9 +8,7 @@ import shapes
 
 pygame.init()
 
-# FPS = 60
-# FramePerSec = pygame.time.Clock()
-
+# Constants
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 700
 
@@ -17,16 +16,17 @@ GRID_COLS = 10
 GRID_ROWS = 20
 BLOCK_SIZE = 32
 BLOCK_GAP = 3
+
 PLAY_WIDTH = BLOCK_SIZE * GRID_COLS
 PLAY_HEIGHT = BLOCK_SIZE * GRID_ROWS
 PLAY_OFFSET_X = (SCREEN_WIDTH - PLAY_WIDTH) // 2
 PLAY_OFFSET_Y = (SCREEN_HEIGHT - PLAY_HEIGHT) // 2
 
+MOVEMENT_DELAY = 10
 
 # Game state
 current_grid_x = 0
 current_grid_y = 0
-
 
 def checkCollision(x, y) -> bool:
     new_x = x + 1
@@ -74,11 +74,21 @@ def drawPieces():
     ))
 
 
+def continue_moving(target_x, target_y):
+    move(target_x, target_y)
+
+
 screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
 pygame.display.set_caption("Tetris")
 
+clock = pygame.time.Clock()
+loop_counter = 0
+
 running = True
+
 while running:
+    dt = clock.tick(60)
+
     screen.fill(colors.BLACK)
     drawGrid()
     drawPieces()
@@ -90,14 +100,21 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 running = False
-            if event.key == pygame.K_LEFT:
-                move(-1, 0)
-            elif event.key == pygame.K_RIGHT:
-                move(1, 0)
-            elif event.key == pygame.K_DOWN:
-                move(0, 1)
-            elif event.key == pygame.K_UP:
-                move(0, -1)
+
+    keys = pygame.key.get_pressed()
+
+    if loop_counter == MOVEMENT_DELAY:
+        loop_counter = 0
+        if keys[K_LEFT]:
+            move(-1, 0)
+        elif keys[K_RIGHT]:
+            move(1, 0)
+        elif keys[K_DOWN]:
+            move(0, 1)
+        elif keys[K_UP]:
+            move(0, - 1)
+
+    loop_counter = loop_counter + 1
 
     # Flip the display
     pygame.display.update()
