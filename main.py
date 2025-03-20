@@ -2,32 +2,25 @@ import sys
 import random
 import pygame
 from pygame.locals import *
+import colors
 
 pygame.init()
 
 FPS = 60
 FramePerSec = pygame.time.Clock()
 
-COLS = 10
-ROWS = 20
-SURFACE_WIDTH = 800
-SURFACE_HEIGHT = 700
-PLAY_WIDTH = 300
-PLAY_HEIGHT = 600
-BLOCK_SIZE = 30
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 700
 
-# Colors
-colorWhite = pygame.Color(255, 255, 255)
-colorBlack = pygame.Color(0, 0, 0)
+GRID_COLS = 10
+GRID_ROWS = 20
+BLOCK_SIZE = 32
+BLOCK_GAP = 3
+PLAY_WIDTH = BLOCK_SIZE * GRID_COLS
+PLAY_HEIGHT = BLOCK_SIZE * GRID_ROWS
+PLAY_OFFSET_X = (SCREEN_WIDTH - PLAY_WIDTH) // 2
+PLAY_OFFSET_Y = (SCREEN_HEIGHT - PLAY_HEIGHT) // 2
 
-# Tetrimino colors
-colorSky = pygame.Color(0, 191, 255)  # I
-colorIndigo = pygame.Color(114, 60, 210)  # J
-colorOrange = pygame.Color(255, 127, 80)  # L
-colorYellow = pygame.Color(255, 215, 0)  # O
-colorGreen = pygame.Color(50, 205, 50)  # S
-colorPurple = pygame.Color(139, 0, 139)  # T
-colorRed = pygame.Color(178, 34, 34)  # Z
 
 # Shapes and their rotations
 SHAPES = [
@@ -36,13 +29,13 @@ SHAPES = [
             [(-1, 0), (0, 0), (1, 0), (2, 0)],
             [(0, -1), (0, 0), (0, 1), (0, 2)]
         ],
-        'color': colorSky
+        'color': colors.CYAN
     },
     {  # O
         'rotations': [
             [(0, 0), (1, 0), (0, 1), (1, 1)]
         ],
-        'color': colorYellow
+        'color': colors.YELLOW
     },
     {  # T
         'rotations': [
@@ -51,7 +44,7 @@ SHAPES = [
             [(-1, 0), (0, 0), (1, 0), (0, -1)],
             [(0, -1), (0, 0), (0, 1), (1, 0)]
         ],
-        'color': colorPurple
+        'color': colors.PURPLE
     },
     {  # L
         'rotations': [
@@ -60,7 +53,7 @@ SHAPES = [
             [(-1, -1), (-1, 0), (0, 0), (1, 0)],
             [(-1, 1), (0, -1), (0, 0), (0, 1)]
         ],
-        'color': colorOrange
+        'color': colors.ORANGE
     },
     {  # J
         'rotations': [
@@ -69,33 +62,60 @@ SHAPES = [
             [(1, -1), (-1, 0), (0, 0), (1, 0)],
             [(-1, -1), (0, -1), (0, 0), (0, 1)]
         ],
-        'color': colorIndigo
+        'color': colors.BLUE
     },
     {  # S
         'rotations': [
             [(-1, 0), (0, 0), (0, 1), (1, 1)],
             [(0, -1), (0, 0), (-1, 0), (-1, 1)]
         ],
-        'color': colorGreen
+        'color': colors.GREEN
     },
     {  # Z
         'rotations': [
             [(-1, 1), (0, 1), (0, 0), (1, 0)],
             [(0, -1), (0, 0), (1, 0), (1, 1)]
         ],
-        'color': colorRed
+        'color': colors.RED
     }
 ]
 
-surface = pygame.display.set_mode([SURFACE_WIDTH, SURFACE_HEIGHT])
+screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
 pygame.display.set_caption("Tetris")
 
-# Run until the user asks to quit
+
+def drawGrid():
+    pygame.draw.rect(screen, colors.BEAVER_300, (
+        PLAY_OFFSET_X,
+        PLAY_OFFSET_Y,
+        PLAY_WIDTH + BLOCK_GAP,
+        PLAY_HEIGHT + BLOCK_GAP
+    ))
+    for x in range(GRID_ROWS):
+        for y in range(GRID_COLS):
+            pygame.draw.rect(screen, colors.BEAVER_800, (
+                PLAY_OFFSET_X + BLOCK_GAP + y * BLOCK_SIZE,
+                PLAY_OFFSET_Y + BLOCK_GAP + x * BLOCK_SIZE,
+                BLOCK_SIZE - BLOCK_GAP,
+                BLOCK_SIZE - BLOCK_GAP
+            ))
+
+def drawPieces():
+    pygame.draw.rect(screen, colors.YELLOW, (
+        PLAY_OFFSET_X + BLOCK_GAP,
+        PLAY_OFFSET_Y + BLOCK_GAP,
+        BLOCK_SIZE - BLOCK_GAP,
+        BLOCK_SIZE - BLOCK_GAP
+    ))
+
+
 running = True
 while running:
-    surface.fill(colorBlack)
-    # Did the user click the window close button?
+    screen.fill(colors.BLACK)
+    drawGrid()
+    drawPieces()
 
+    # Did the user click the window close button?
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
