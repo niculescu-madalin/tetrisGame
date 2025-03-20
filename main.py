@@ -47,7 +47,6 @@ def move(dx, dy):
         current_grid_y = new_y
 
 
-
 def drawGrid():
     pygame.draw.rect(screen, colors.BEAVER_300, (
         PLAY_OFFSET_X,
@@ -74,15 +73,16 @@ def drawPieces():
     ))
 
 
-def continue_moving(target_x, target_y):
-    move(target_x, target_y)
-
-
+# create screen
 screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
 pygame.display.set_caption("Tetris")
 
+# initialize clock
 clock = pygame.time.Clock()
-loop_counter = 0
+
+left_duration = 0
+right_duration = 0
+down_duration = 0
 
 running = True
 
@@ -93,6 +93,11 @@ while running:
     drawGrid()
     drawPieces()
 
+    # Piece movement
+    keys = pygame.key.get_pressed()
+
+    speed = dt // 10
+
     # Did the user click the window close button?
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -100,24 +105,42 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 running = False
+            if event.key == pygame.K_LEFT:
+                move(-1, 0)
+            elif event.key == K_RIGHT:
+                move(1, 0)
+            elif event.key == K_DOWN:
+                move(0, 1)
 
-    keys = pygame.key.get_pressed()
+    if keys[K_LEFT]:
+        left_duration = left_duration + 1
+    else:
+        left_duration = 0
 
-    if loop_counter == MOVEMENT_DELAY:
-        loop_counter = 0
-        if keys[K_LEFT]:
-            move(-1, 0)
-        elif keys[K_RIGHT]:
-            move(1, 0)
-        elif keys[K_DOWN]:
-            move(0, 1)
-        elif keys[K_UP]:
-            move(0, - 1)
+    if keys[K_RIGHT]:
+        right_duration = right_duration + 1
+    else:
+        right_duration = 0
 
-    loop_counter = loop_counter + 1
+    if keys[K_DOWN]:
+        down_duration = down_duration + 1
+    else:
+        down_duration = 0
+
+    if left_duration == MOVEMENT_DELAY:
+        left_duration = 0
+        move(-1, 0)
+
+    if right_duration == MOVEMENT_DELAY:
+        right_duration = 0
+        move(1, 0)
+
+    if down_duration == MOVEMENT_DELAY:
+        down_duration = 0
+        move(0, 1)
 
     # Flip the display
-    pygame.display.update()
+    pygame.display.flip()
 
 # Done! Time to quit.
 pygame.quit()
