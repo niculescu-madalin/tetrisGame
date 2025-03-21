@@ -25,22 +25,29 @@ PLAY_OFFSET_Y = (SCREEN_HEIGHT - PLAY_HEIGHT) // 2
 MOVEMENT_DELAY = 10
 
 # Game state
+grid = [[0 for _ in range(GRID_COLS)] for _ in range(GRID_ROWS)]
 current_piece = None
 piece_x = 0
 piece_y = 0
+piece_rotation = 0
+
+game_over = False
 
 
 def newPiece():
-    global current_piece, piece_y, piece_x
+    global current_piece, piece_y, piece_x, piece_rotation, game_over
     current_piece = random.choice(shapes.SHAPES)
+    current_rotation = 0
     piece_x = GRID_COLS // 2 - 1
     piece_y = 0
+    if checkCollision(piece_x, piece_y, piece_rotation):
+        game_over = True
 
 
-def checkCollision(x, y) -> bool:
+def checkCollision(x, y, rotation) -> bool:
     if current_piece is None:
         return True
-    shape = current_piece['rotations'][0]
+    shape = current_piece['rotations'][rotation]
     for dx, dy in shape:
         new_x = x + dx
         new_y = y + dy
@@ -53,11 +60,33 @@ def checkCollision(x, y) -> bool:
 
 def move(dx, dy):
     global piece_x, piece_y
+    if current_piece is None or game_over:
+        return False
     new_x = piece_x + dx
     new_y = piece_y + dy
-    if not checkCollision(new_x, new_y):
+    if not checkCollision(new_x, new_y, piece_rotation):
         piece_x = new_x
         piece_y = new_y
+        return True
+    return False
+
+
+def rotate():
+    global piece_x, piece_y, piece_rotation
+    if current_piece is None:
+        return
+
+    # get a new rotation from the possible oness
+    new_rotation = (piece_rotation + 1) % len(current_piece['rotations'])
+    if not checkCollision(piece_x, piece_y, new_rotation):
+        piece_rotation = new_rotation
+    else:
+        if not checkCollision(piece_x - 1, piece_y, new_rotation):
+            piece_rotation = new_rotation
+            piece_x -= 1
+        elif not checkCollision(piece_x + 1, piece_y, new_rotation):
+            piece_rotation = new_rotation
+            piece_x += 1
 
 
 def drawGrid():
@@ -80,7 +109,7 @@ def drawGrid():
 
 def drawPieces():
     color = current_piece['color']
-    shape = current_piece['rotations'][0]
+    shape = current_piece['rotations'][piece_rotation]
     for dx, dy in shape:
         x = piece_x + dx
         y = piece_y + dy
@@ -95,6 +124,8 @@ def drawPieces():
 # create screen
 screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
 pygame.display.set_caption("Tetris")
+fall_time = 0
+fall_speed = 500
 
 # initialize clock
 clock = pygame.time.Clock()
@@ -108,18 +139,14 @@ newPiece()
 running = True
 
 while running:
-    dt = clock.tick(60)
-
     screen.fill(colors.BLACK)
-    drawGrid()
-    drawPieces()
+    dt = clock.tick(60)
+    current_time = pygame.time.get_ticks()
 
     # Piece movement
     keys = pygame.key.get_pressed()
 
-    speed = dt // 10
-
-    # Did the user click the window close button?
+    # Event handling
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -134,7 +161,8 @@ while running:
                 move(1, 0)
             elif event.key == K_DOWN:
                 move(0, 1)
-
+            elif event.key == K_UP:
+                rotate()
 
     # Movement
     if keys[K_LEFT]:
@@ -163,6 +191,15 @@ while running:
     if down_duration == MOVEMENT_DELAY:
         down_duration = 0
         move(0, 1)
+
+    # Game logic
+    if current_time - fall_time >= fall_speed:
+        move(0, 1)
+        fall_time = current_time
+
+    # Drawing
+    drawGrid()
+    drawPieces()
 
     # Flip the display
     pygame.display.flip()
