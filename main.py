@@ -34,6 +34,8 @@ piece_x = 0
 piece_y = 0
 piece_rotation = 0
 
+hold_piece = None
+
 score = 0
 paused = False
 game_over = False
@@ -140,6 +142,17 @@ def clear_lines():
     return lines_cleared
 
 
+def hold():
+    global hold_piece, current_piece
+    if not hold_piece:
+        hold_piece = current_piece
+        new_piece()
+    else:
+        aux = current_piece
+        current_piece = hold_piece
+        hold_piece = aux
+
+
 def draw_grid():
     pygame.draw.rect(screen, colors.BEAVER_300, (
         PLAY_OFFSET_X,
@@ -182,6 +195,24 @@ def draw_pieces():
                 BLOCK_SIZE - BLOCK_GAP
             ))
 
+
+def draw_hold_piece():
+    y_offset = PLAY_OFFSET_Y + BLOCK_GAP
+    x_offset = PLAY_OFFSET_X - BLOCK_GAP - BLOCK_SIZE * 3
+    if not hold_piece:
+        return
+    color = hold_piece['color']
+    shape = hold_piece['rotations'][0]
+
+    for dx, dy in shape:
+        x = dx
+        y = dy
+        pygame.draw.rect(screen, color, (
+            x * BLOCK_SIZE + x_offset,
+            y * BLOCK_SIZE + y_offset,
+            BLOCK_SIZE - BLOCK_GAP,
+            BLOCK_SIZE - BLOCK_GAP
+        ))
 
 def draw_next_pieces_preview():
     y_offset = PLAY_OFFSET_Y + BLOCK_GAP
@@ -251,6 +282,8 @@ while running:
                 move(0, 1)
             elif event.key == K_UP:
                 rotate()
+            elif event.key == K_c:
+                hold()
 
     # Movement
     if keys[K_LEFT]:
@@ -291,6 +324,7 @@ while running:
     draw_grid()
     draw_pieces()
     draw_next_pieces_preview()
+    draw_hold_piece()
 
     # Flip the display
     pygame.display.flip()
