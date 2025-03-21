@@ -283,7 +283,7 @@ def draw_pause_menu():
     text = font.render('Press P to Resume', True, colors.WHITE)
     text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50))
     screen.blit(text, text_rect)
-    text = font.render('Press Q to Quit', True, colors.WHITE)
+    text = font.render('Press ESC to Quit', True, colors.WHITE)
     text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100))
     screen.blit(text, text_rect)
 
@@ -300,7 +300,7 @@ def draw_game_over():
     text = font.render(f'Score: {score}', True, colors.WHITE)
     text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50))
     screen.blit(text, text_rect)
-    text = font.render('Press Q to Quit', True, colors.WHITE)
+    text = font.render('Press ESC to Quit', True, colors.WHITE)
     text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100))
     screen.blit(text, text_rect)
 
