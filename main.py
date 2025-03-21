@@ -20,10 +20,15 @@ PLAY_HEIGHT = BLOCK_SIZE * GRID_ROWS
 PLAY_OFFSET_X = (SCREEN_WIDTH - PLAY_WIDTH) // 2
 PLAY_OFFSET_Y = (SCREEN_HEIGHT - PLAY_HEIGHT) // 2
 
-MOVEMENT_DELAY = 10
+MOVEMENT_DELAY = 6
 
 # Game state
 grid = [[0 for _ in range(GRID_COLS)] for _ in range(GRID_ROWS)]
+
+current_bag = []
+next_bag = shapes.SHAPES[:]
+random.shuffle(next_bag)
+
 current_piece = None
 piece_x = 0
 piece_y = 0
@@ -34,9 +39,21 @@ paused = False
 game_over = False
 
 
+def new_bag():
+    global current_bag, next_bag
+    current_bag = next_bag
+    next_bag = shapes.SHAPES[:]
+    random.shuffle(next_bag)
+
+
 def new_piece():
     global current_piece, piece_y, piece_x, piece_rotation, game_over
-    current_piece = random.choice(shapes.SHAPES)
+
+    if not len(current_bag):
+        new_bag()
+
+    current_piece = current_bag.pop()
+
     piece_rotation = 0
     piece_x = GRID_COLS // 2 - 1
     piece_y = 0
@@ -45,7 +62,7 @@ def new_piece():
 
 
 def check_collision(x, y, rotation) -> bool:
-    if current_piece is None:
+    if current_piece is None or paused or game_over:
         return True
     shape = current_piece['rotations'][rotation]
     for dx, dy in shape:
@@ -60,7 +77,7 @@ def check_collision(x, y, rotation) -> bool:
 
 def move(dx, dy):
     global piece_x, piece_y
-    if current_piece is None or game_over:
+    if current_piece is None or paused or game_over:
         return False
     new_x = piece_x + dx
     new_y = piece_y + dy
@@ -73,7 +90,7 @@ def move(dx, dy):
 
 def rotate():
     global piece_x, piece_y, piece_rotation
-    if current_piece is None:
+    if current_piece is None or paused or game_over:
         return
 
     # get a new rotation from the possible oness
@@ -90,7 +107,7 @@ def rotate():
 
 
 def drop():
-    if game_over:
+    if game_over or paused:
         return
     while move(0, 1):
         pass
@@ -121,6 +138,7 @@ def clear_lines():
             grid.insert(0, [0] * GRID_COLS)
             lines_cleared += 1
     return lines_cleared
+
 
 def draw_grid():
     pygame.draw.rect(screen, colors.BEAVER_300, (
@@ -163,6 +181,32 @@ def draw_pieces():
                 BLOCK_SIZE - BLOCK_GAP,
                 BLOCK_SIZE - BLOCK_GAP
             ))
+
+
+def draw_next_pieces_preview():
+    y_offset = PLAY_OFFSET_Y + BLOCK_GAP
+    x_offset = PLAY_OFFSET_X + PLAY_WIDTH + BLOCK_GAP + BLOCK_SIZE * 2
+
+    next_pieces = reversed(next_bag + current_bag)
+    preview_number = 0
+
+    for piece in next_pieces:
+        if preview_number >= 5:
+            break
+        color = piece['color']
+        shape = piece['rotations'][0]
+        for dx, dy in shape:
+            x = dx
+            y = dy
+            pygame.draw.rect(screen, color, (
+                x * BLOCK_SIZE + x_offset,
+                y * BLOCK_SIZE + y_offset,
+                BLOCK_SIZE - BLOCK_GAP,
+                BLOCK_SIZE - BLOCK_GAP
+            ))
+
+        y_offset += BLOCK_SIZE * 2.5
+        preview_number += 1
 
 
 # create screen
@@ -232,19 +276,21 @@ while running:
         right_duration = 0
         move(1, 0)
 
-    if down_duration == MOVEMENT_DELAY:
+    if down_duration == MOVEMENT_DELAY / 2:
         down_duration = 0
         move(0, 1)
 
     # Game logic
-    if current_time - fall_time >= fall_speed:
-        if not move(0, 1):
-            lock_piece()
-        fall_time = current_time
+    if not game_over and not paused:
+        if current_time - fall_time >= fall_speed:
+            if not move(0, 1):
+                lock_piece()
+            fall_time = current_time
 
     # Drawing
     draw_grid()
     draw_pieces()
+    draw_next_pieces_preview()
 
     # Flip the display
     pygame.display.flip()
