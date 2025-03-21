@@ -2,7 +2,7 @@ import pygame
 
 # UI Colors
 WHITE = pygame.Color(255, 255, 255)
-
+GRAY = pygame.Color(100, 100, 100)
 BLACK = pygame.Color(0, 0, 0)
 
 BEAVER_800 = pygame.Color(27, 21, 18)

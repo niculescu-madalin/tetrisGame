@@ -22,6 +22,12 @@ PLAY_OFFSET_Y = (SCREEN_HEIGHT - PLAY_HEIGHT) // 2
 
 MOVEMENT_DELAY = 6
 
+# Game states
+MENU = 0
+PLAYING = 1
+PAUSED = 2
+GAME_OVER = 3
+
 # Game state
 grid = [[0 for _ in range(GRID_COLS)] for _ in range(GRID_ROWS)]
 
@@ -305,6 +311,22 @@ def draw_game_over():
     screen.blit(text, text_rect)
 
 
+def draw_main_menu():
+    screen.fill(colors.BLACK)
+    font = pygame.font.Font(None, 100)
+    title = font.render('TETRIS', True, colors.CYAN)
+    title_rect = title.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//4))
+    screen.blit(title, title_rect)
+
+    font = pygame.font.Font(None, 50)
+    menu_options = ["Start Game", "How to Play", "Quit"]
+    for i, option in enumerate(menu_options):
+        color = colors.WHITE if i == menu_selection else colors.GRAY
+        text = font.render(option, True, color)
+        text_rect = text.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2 + i*60))
+        screen.blit(text, text_rect)
+
+
 # create screen
 screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
 pygame.display.set_caption("Tetris")
@@ -318,9 +340,37 @@ left_duration = 0
 right_duration = 0
 down_duration = 0
 
-new_piece()
+# new_piece()
+
+game_state = MENU
+menu_selection = 0
 
 running = True
+
+
+def reset_game():
+    global grid
+    global hold_piece, current_piece, piece_x, piece_y, piece_rotation
+    global score, game_state
+    global current_bag, next_bag
+
+    grid = [[0 for _ in range(GRID_COLS)] for _ in range(GRID_ROWS)]
+
+    current_piece = None
+    hold_piece = None
+    piece_x = 0
+    piece_y = 0
+    piece_rotation = 0
+
+    score = 0
+    game_state = PLAYING
+
+    current_bag = []
+    next_bag = shapes.SHAPES[:]
+    random.shuffle(next_bag)
+
+    new_piece()
+
 
 while running:
     screen.fill(colors.BLACK)
@@ -334,24 +384,39 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                running = False
-            elif not game_over:
-                if event.key == pygame.K_p:
-                    paused = not paused
-                elif event.key == pygame.K_SPACE:
-                    drop()
-                elif event.key == pygame.K_LEFT:
-                    move(-1, 0)
-                elif event.key == K_RIGHT:
-                    move(1, 0)
-                elif event.key == K_DOWN:
-                    move(0, 1)
-                elif event.key == K_UP:
-                    rotate()
-                elif event.key == K_c:
-                    hold()
+
+            if game_state == MENU:
+                if event.key == pygame.K_DOWN:
+                    menu_selection = (menu_selection + 1) % 3
+                elif event.key == pygame.K_UP:
+                    menu_selection = (menu_selection - 1) % 3
+                elif event.key == pygame.K_RETURN:
+                    if menu_selection == 0:  # Start Game
+                        reset_game()
+                    elif menu_selection == 1:  # How to Play
+                        game_state = 4  # Temporary state for instructions
+                    elif menu_selection == 2:  # Quit
+                        running = False
+            elif game_state == PLAYING:
+                if event.key == pygame.K_ESCAPE:
+                    running = False
+                elif not game_over:
+                    if event.key == pygame.K_p:
+                        paused = not paused
+                    elif event.key == pygame.K_SPACE:
+                        drop()
+                    elif event.key == pygame.K_LEFT:
+                        move(-1, 0)
+                    elif event.key == K_RIGHT:
+                        move(1, 0)
+                    elif event.key == K_DOWN:
+                        move(0, 1)
+                    elif event.key == K_UP:
+                        rotate()
+                    elif event.key == K_c:
+                        hold()
 
     # Movement
 
@@ -391,11 +456,14 @@ while running:
             fall_time = current_time
 
     # Drawing
-    draw_grid()
-    draw_pieces()
-    draw_next_pieces_preview()
-    draw_hold_piece()
-    draw_score()
+    if game_state == MENU:
+        draw_main_menu()
+    elif game_state == PLAYING:
+        draw_grid()
+        draw_pieces()
+        draw_next_pieces_preview()
+        draw_hold_piece()
+        draw_score()
 
     if paused:
         draw_pause_menu()
