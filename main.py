@@ -29,6 +29,8 @@ piece_x = 0
 piece_y = 0
 piece_rotation = 0
 
+score = 0
+paused = False
 game_over = False
 
 
@@ -87,7 +89,16 @@ def rotate():
             piece_x += 1
 
 
+def drop():
+    if game_over:
+        return
+    while move(0, 1):
+        pass
+    lock_piece()
+
+
 def lock_piece():
+    global score
     if current_piece is None:
         return
     shape = current_piece['rotations'][piece_rotation]
@@ -97,8 +108,19 @@ def lock_piece():
         y = piece_y + dy
         if 0 <= x < GRID_COLS and 0 <= y < GRID_ROWS:
             grid[y][x] = color
+    lines_cleared = clear_lines()
+    score += lines_cleared * 100
     new_piece()
 
+
+def clear_lines():
+    lines_cleared = 0
+    for y in range(GRID_ROWS - 1, -1, -1):
+        if all(grid[y][x] != 0 for x in range(GRID_COLS)):
+            del grid[y]
+            grid.insert(0, [0] * GRID_COLS)
+            lines_cleared += 1
+    return lines_cleared
 
 def draw_grid():
     pygame.draw.rect(screen, colors.BEAVER_300, (
@@ -130,6 +152,7 @@ def draw_grid():
 def draw_pieces():
     color = current_piece['color']
     shape = current_piece['rotations'][piece_rotation]
+
     for dx, dy in shape:
         x = piece_x + dx
         y = piece_y + dy
@@ -175,7 +198,7 @@ while running:
             if event.key == pygame.K_ESCAPE:
                 running = False
             elif event.key == pygame.K_SPACE:
-                new_piece()
+                drop()
             elif event.key == pygame.K_LEFT:
                 move(-1, 0)
             elif event.key == K_RIGHT:
