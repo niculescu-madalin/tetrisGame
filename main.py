@@ -457,8 +457,13 @@ while running:
                         game_state = MENU
 
             elif game_state == HOW_TO_PLAY:
-                if event.key == (pygame.K_q or pygame.K_ESCAPE or pygame.K_RETURN):
+                if event.key == pygame.K_q:
                     game_state = MENU
+                elif event.key == pygame.K_ESCAPE:
+                    game_state = MENU
+                elif event.key == pygame.K_RETURN:
+                    game_state = MENU
+
 
     if game_state == MENU:
         draw_main_menu()
