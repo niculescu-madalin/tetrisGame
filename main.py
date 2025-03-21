@@ -143,14 +143,17 @@ def clear_lines():
 
 
 def hold():
-    global hold_piece, current_piece
+    global hold_piece, current_piece, piece_y, piece_x, piece_rotation, game_over
     if not hold_piece:
         hold_piece = current_piece
         new_piece()
     else:
-        aux = current_piece
-        current_piece = hold_piece
-        hold_piece = aux
+        current_piece, hold_piece = hold_piece, current_piece
+        piece_x = GRID_COLS // 2 - 1
+        piece_y = 0
+        piece_rotation = 0
+        if check_collision(piece_x, piece_y, piece_rotation):
+            game_over = True
 
 
 def draw_grid():
@@ -181,24 +184,33 @@ def draw_grid():
 
 
 def draw_pieces():
-    color = current_piece['color']
-    shape = current_piece['rotations'][piece_rotation]
+    if current_piece and not game_over:
+        color = current_piece['color']
+        shape = current_piece['rotations'][piece_rotation]
 
-    for dx, dy in shape:
-        x = piece_x + dx
-        y = piece_y + dy
-        if 0 <= x < GRID_COLS and 0 <= y < GRID_ROWS:
-            pygame.draw.rect(screen, color, (
-                PLAY_OFFSET_X + BLOCK_GAP + x * BLOCK_SIZE,
-                PLAY_OFFSET_Y + BLOCK_GAP + y * BLOCK_SIZE,
-                BLOCK_SIZE - BLOCK_GAP,
-                BLOCK_SIZE - BLOCK_GAP
-            ))
+        for dx, dy in shape:
+            x = piece_x + dx
+            y = piece_y + dy
+            if 0 <= x < GRID_COLS and 0 <= y < GRID_ROWS:
+                pygame.draw.rect(screen, color, (
+                    PLAY_OFFSET_X + BLOCK_GAP + x * BLOCK_SIZE,
+                    PLAY_OFFSET_Y + BLOCK_GAP + y * BLOCK_SIZE,
+                    BLOCK_SIZE - BLOCK_GAP,
+                    BLOCK_SIZE - BLOCK_GAP
+                ))
 
 
 def draw_hold_piece():
-    y_offset = PLAY_OFFSET_Y + BLOCK_GAP
+    y_offset = PLAY_OFFSET_Y + BLOCK_GAP + 64
     x_offset = PLAY_OFFSET_X - BLOCK_GAP - BLOCK_SIZE * 3
+
+    font = pygame.font.Font('Pixica-Bold.ttf', 64)
+    text = font.render('Hold', True, colors.WHITE)
+    screen.blit(text, (
+        x_offset - BLOCK_SIZE,
+        PLAY_OFFSET_Y + BLOCK_GAP
+    ))
+
     if not hold_piece:
         return
     color = hold_piece['color']
@@ -215,8 +227,15 @@ def draw_hold_piece():
         ))
 
 def draw_next_pieces_preview():
-    y_offset = PLAY_OFFSET_Y + BLOCK_GAP
+    y_offset = PLAY_OFFSET_Y + BLOCK_GAP + 64
     x_offset = PLAY_OFFSET_X + PLAY_WIDTH + BLOCK_GAP + BLOCK_SIZE * 2
+
+    font = pygame.font.Font('Pixica-Bold.ttf', 64)
+    text = font.render('Next', True, colors.WHITE)
+    screen.blit(text, (
+        x_offset - BLOCK_SIZE,
+        PLAY_OFFSET_Y + BLOCK_GAP
+    ))
 
     next_pieces = reversed(next_bag + current_bag)
     preview_number = 0
