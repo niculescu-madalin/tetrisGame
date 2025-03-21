@@ -127,6 +127,7 @@ def lock_piece():
         y = piece_y + dy
         if 0 <= x < GRID_COLS and 0 <= y < GRID_ROWS:
             grid[y][x] = color
+
     lines_cleared = clear_lines()
     score += lines_cleared * 100
     new_piece()
@@ -258,6 +259,52 @@ def draw_next_pieces_preview():
         preview_number += 1
 
 
+def draw_score():
+    y_offset = PLAY_OFFSET_Y + PLAY_HEIGHT - 32
+    x_offset = PLAY_OFFSET_X + PLAY_WIDTH + BLOCK_SIZE
+
+    font = pygame.font.Font('Pixica-Regular.ttf', 32)
+    text = font.render('Score: ' + str(score), True, colors.WHITE)
+    screen.blit(text, (
+        x_offset,
+        y_offset
+    ))
+
+
+def draw_pause_menu():
+    overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+    overlay.fill((0, 0, 0, 128))
+    screen.blit(overlay, (0, 0))
+    font = pygame.font.Font('Pixica-Bold.ttf', 74)
+    text = font.render('PAUSED', True, colors.WHITE)
+    text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50))
+    screen.blit(text, text_rect)
+    font = pygame.font.Font('Pixica-Regular.ttf', 36)
+    text = font.render('Press P to Resume', True, colors.WHITE)
+    text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50))
+    screen.blit(text, text_rect)
+    text = font.render('Press Q to Quit', True, colors.WHITE)
+    text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100))
+    screen.blit(text, text_rect)
+
+
+def draw_game_over():
+    overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+    overlay.fill((0, 0, 0, 128))
+    screen.blit(overlay, (0, 0))
+    font = pygame.font.Font('Pixica-Bold.ttf', 74)
+    text = font.render('GAME OVER', True, colors.RED)
+    text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50))
+    screen.blit(text, text_rect)
+    font = pygame.font.Font('Pixica-Regular.ttf', 36)
+    text = font.render(f'Score: {score}', True, colors.WHITE)
+    text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50))
+    screen.blit(text, text_rect)
+    text = font.render('Press Q to Quit', True, colors.WHITE)
+    text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100))
+    screen.blit(text, text_rect)
+
+
 # create screen
 screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
 pygame.display.set_caption("Tetris")
@@ -290,46 +337,51 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 running = False
-            elif event.key == pygame.K_SPACE:
-                drop()
-            elif event.key == pygame.K_LEFT:
-                move(-1, 0)
-            elif event.key == K_RIGHT:
-                move(1, 0)
-            elif event.key == K_DOWN:
-                move(0, 1)
-            elif event.key == K_UP:
-                rotate()
-            elif event.key == K_c:
-                hold()
+            elif not game_over:
+                if event.key == pygame.K_p:
+                    paused = not paused
+                elif event.key == pygame.K_SPACE:
+                    drop()
+                elif event.key == pygame.K_LEFT:
+                    move(-1, 0)
+                elif event.key == K_RIGHT:
+                    move(1, 0)
+                elif event.key == K_DOWN:
+                    move(0, 1)
+                elif event.key == K_UP:
+                    rotate()
+                elif event.key == K_c:
+                    hold()
 
     # Movement
-    if keys[K_LEFT]:
-        left_duration = left_duration + 1
-    else:
-        left_duration = 0
 
-    if keys[K_RIGHT]:
-        right_duration = right_duration + 1
-    else:
-        right_duration = 0
+    if not game_over:
+        if keys[K_LEFT]:
+            left_duration = left_duration + 1
+        else:
+            left_duration = 0
 
-    if keys[K_DOWN]:
-        down_duration = down_duration + 1
-    else:
-        down_duration = 0
+        if keys[K_RIGHT]:
+            right_duration = right_duration + 1
+        else:
+            right_duration = 0
 
-    if left_duration == MOVEMENT_DELAY:
-        left_duration = 0
-        move(-1, 0)
+        if keys[K_DOWN]:
+            down_duration = down_duration + 1
+        else:
+            down_duration = 0
 
-    if right_duration == MOVEMENT_DELAY:
-        right_duration = 0
-        move(1, 0)
+        if left_duration == MOVEMENT_DELAY:
+            left_duration = 0
+            move(-1, 0)
 
-    if down_duration == MOVEMENT_DELAY / 2:
-        down_duration = 0
-        move(0, 1)
+        if right_duration == MOVEMENT_DELAY:
+            right_duration = 0
+            move(1, 0)
+
+        if down_duration == MOVEMENT_DELAY / 2:
+            down_duration = 0
+            move(0, 1)
 
     # Game logic
     if not game_over and not paused:
@@ -343,6 +395,12 @@ while running:
     draw_pieces()
     draw_next_pieces_preview()
     draw_hold_piece()
+    draw_score()
+
+    if paused:
+        draw_pause_menu()
+    if game_over:
+        draw_game_over()
 
     # Flip the display
     pygame.display.flip()
