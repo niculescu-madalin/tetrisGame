@@ -25,26 +25,39 @@ PLAY_OFFSET_Y = (SCREEN_HEIGHT - PLAY_HEIGHT) // 2
 MOVEMENT_DELAY = 10
 
 # Game state
-current_grid_x = 0
-current_grid_y = 0
+current_piece = None
+piece_x = 0
+piece_y = 0
+
+
+def newPiece():
+    global current_piece, piece_y, piece_x
+    current_piece = random.choice(shapes.SHAPES)
+    piece_x = GRID_COLS // 2 - 1
+    piece_y = 0
+
 
 def checkCollision(x, y) -> bool:
-    new_x = x + 1
-    new_y = y + 1
-    if new_x <= 0 or new_x > GRID_COLS or new_y > GRID_ROWS:
+    if current_piece is None:
         return True
-    if new_y <= 0:
-        return True
+    shape = current_piece['rotations'][0]
+    for dx, dy in shape:
+        new_x = x + dx
+        new_y = y + dy
+        if new_x < 0 or new_x >= GRID_COLS or new_y >= GRID_ROWS:
+            return True
+        if new_y < 0:
+            return True
     return False
 
 
 def move(dx, dy):
-    global current_grid_x, current_grid_y
-    new_x = current_grid_x + dx
-    new_y = current_grid_y + dy
+    global piece_x, piece_y
+    new_x = piece_x + dx
+    new_y = piece_y + dy
     if not checkCollision(new_x, new_y):
-        current_grid_x = new_x
-        current_grid_y = new_y
+        piece_x = new_x
+        piece_y = new_y
 
 
 def drawGrid():
@@ -54,6 +67,7 @@ def drawGrid():
         PLAY_WIDTH + BLOCK_GAP,
         PLAY_HEIGHT + BLOCK_GAP
     ))
+
     for x in range(GRID_ROWS):
         for y in range(GRID_COLS):
             pygame.draw.rect(screen, colors.BEAVER_800, (
@@ -65,13 +79,18 @@ def drawGrid():
 
 
 def drawPieces():
-    pygame.draw.rect(screen, colors.YELLOW, (
-        PLAY_OFFSET_X + BLOCK_GAP + current_grid_x * BLOCK_SIZE,
-        PLAY_OFFSET_Y + BLOCK_GAP + current_grid_y * BLOCK_SIZE,
-        BLOCK_SIZE - BLOCK_GAP,
-        BLOCK_SIZE - BLOCK_GAP
-    ))
-
+    color = current_piece['color']
+    shape = current_piece['rotations'][0]
+    for dx, dy in shape:
+        x = piece_x + dx
+        y = piece_y + dy
+        if 0 <= x < GRID_COLS and 0 <= y < GRID_ROWS:
+            pygame.draw.rect(screen, color, (
+                PLAY_OFFSET_X + BLOCK_GAP + x * BLOCK_SIZE,
+                PLAY_OFFSET_Y + BLOCK_GAP + y * BLOCK_SIZE,
+                BLOCK_SIZE - BLOCK_GAP,
+                BLOCK_SIZE - BLOCK_GAP
+            ))
 
 # create screen
 screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
@@ -83,6 +102,8 @@ clock = pygame.time.Clock()
 left_duration = 0
 right_duration = 0
 down_duration = 0
+
+newPiece()
 
 running = True
 
@@ -105,13 +126,17 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 running = False
-            if event.key == pygame.K_LEFT:
+            elif event.key == pygame.K_SPACE:
+                newPiece()
+            elif event.key == pygame.K_LEFT:
                 move(-1, 0)
             elif event.key == K_RIGHT:
                 move(1, 0)
             elif event.key == K_DOWN:
                 move(0, 1)
 
+
+    # Movement
     if keys[K_LEFT]:
         left_duration = left_duration + 1
     else:
