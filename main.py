@@ -51,7 +51,7 @@ def check_collision(x, y, rotation) -> bool:
         new_y = y + dy
         if new_x < 0 or new_x >= GRID_COLS or new_y >= GRID_ROWS:
             return True
-        if new_y < 0:
+        if new_y >= 0 and grid[new_y][new_x]:
             return True
     return False
 
@@ -87,6 +87,19 @@ def rotate():
             piece_x += 1
 
 
+def lock_piece():
+    if current_piece is None:
+        return
+    shape = current_piece['rotations'][piece_rotation]
+    color = current_piece['color']
+    for dx, dy in shape:
+        x = piece_x + dx
+        y = piece_y + dy
+        if 0 <= x < GRID_COLS and 0 <= y < GRID_ROWS:
+            grid[y][x] = color
+    new_piece()
+
+
 def draw_grid():
     pygame.draw.rect(screen, colors.BEAVER_300, (
         PLAY_OFFSET_X,
@@ -95,14 +108,23 @@ def draw_grid():
         PLAY_HEIGHT + BLOCK_GAP
     ))
 
-    for x in range(GRID_ROWS):
-        for y in range(GRID_COLS):
-            pygame.draw.rect(screen, colors.BEAVER_800, (
-                PLAY_OFFSET_X + BLOCK_GAP + y * BLOCK_SIZE,
-                PLAY_OFFSET_Y + BLOCK_GAP + x * BLOCK_SIZE,
-                BLOCK_SIZE - BLOCK_GAP,
-                BLOCK_SIZE - BLOCK_GAP
-            ))
+    for y in range(GRID_ROWS):
+        for x in range(GRID_COLS):
+            color = grid[y][x]
+            if color:
+                pygame.draw.rect(screen, color, (
+                    PLAY_OFFSET_X + BLOCK_GAP + x * BLOCK_SIZE,
+                    PLAY_OFFSET_Y + BLOCK_GAP + y * BLOCK_SIZE,
+                    BLOCK_SIZE - BLOCK_GAP,
+                    BLOCK_SIZE - BLOCK_GAP
+                ))
+            else:
+                pygame.draw.rect(screen, colors.BEAVER_800, (
+                    PLAY_OFFSET_X + BLOCK_GAP + x * BLOCK_SIZE,
+                    PLAY_OFFSET_Y + BLOCK_GAP + y * BLOCK_SIZE,
+                    BLOCK_SIZE - BLOCK_GAP,
+                    BLOCK_SIZE - BLOCK_GAP
+                ))
 
 
 def draw_pieces():
@@ -193,7 +215,8 @@ while running:
 
     # Game logic
     if current_time - fall_time >= fall_speed:
-        move(0, 1)
+        if not move(0, 1):
+            lock_piece()
         fall_time = current_time
 
     # Drawing
