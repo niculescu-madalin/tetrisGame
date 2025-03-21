@@ -1,4 +1,3 @@
-import pygame
 import colors
 
 # Shapes and their rotations
@@ -58,3 +57,4 @@ SHAPES = [
         'color': colors.RED
     }
 ]
+

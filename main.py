@@ -1,6 +1,4 @@
-import sys
 import random
-import time
 import pygame
 from pygame.locals import *
 import colors
@@ -34,17 +32,17 @@ piece_rotation = 0
 game_over = False
 
 
-def newPiece():
+def new_piece():
     global current_piece, piece_y, piece_x, piece_rotation, game_over
     current_piece = random.choice(shapes.SHAPES)
-    current_rotation = 0
+    piece_rotation = 0
     piece_x = GRID_COLS // 2 - 1
     piece_y = 0
-    if checkCollision(piece_x, piece_y, piece_rotation):
+    if check_collision(piece_x, piece_y, piece_rotation):
         game_over = True
 
 
-def checkCollision(x, y, rotation) -> bool:
+def check_collision(x, y, rotation) -> bool:
     if current_piece is None:
         return True
     shape = current_piece['rotations'][rotation]
@@ -64,7 +62,7 @@ def move(dx, dy):
         return False
     new_x = piece_x + dx
     new_y = piece_y + dy
-    if not checkCollision(new_x, new_y, piece_rotation):
+    if not check_collision(new_x, new_y, piece_rotation):
         piece_x = new_x
         piece_y = new_y
         return True
@@ -78,18 +76,18 @@ def rotate():
 
     # get a new rotation from the possible oness
     new_rotation = (piece_rotation + 1) % len(current_piece['rotations'])
-    if not checkCollision(piece_x, piece_y, new_rotation):
+    if not check_collision(piece_x, piece_y, new_rotation):
         piece_rotation = new_rotation
     else:
-        if not checkCollision(piece_x - 1, piece_y, new_rotation):
+        if not check_collision(piece_x - 1, piece_y, new_rotation):
             piece_rotation = new_rotation
             piece_x -= 1
-        elif not checkCollision(piece_x + 1, piece_y, new_rotation):
+        elif not check_collision(piece_x + 1, piece_y, new_rotation):
             piece_rotation = new_rotation
             piece_x += 1
 
 
-def drawGrid():
+def draw_grid():
     pygame.draw.rect(screen, colors.BEAVER_300, (
         PLAY_OFFSET_X,
         PLAY_OFFSET_Y,
@@ -107,7 +105,7 @@ def drawGrid():
             ))
 
 
-def drawPieces():
+def draw_pieces():
     color = current_piece['color']
     shape = current_piece['rotations'][piece_rotation]
     for dx, dy in shape:
@@ -120,6 +118,7 @@ def drawPieces():
                 BLOCK_SIZE - BLOCK_GAP,
                 BLOCK_SIZE - BLOCK_GAP
             ))
+
 
 # create screen
 screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
@@ -134,7 +133,7 @@ left_duration = 0
 right_duration = 0
 down_duration = 0
 
-newPiece()
+new_piece()
 
 running = True
 
@@ -154,7 +153,7 @@ while running:
             if event.key == pygame.K_ESCAPE:
                 running = False
             elif event.key == pygame.K_SPACE:
-                newPiece()
+                new_piece()
             elif event.key == pygame.K_LEFT:
                 move(-1, 0)
             elif event.key == K_RIGHT:
@@ -198,8 +197,8 @@ while running:
         fall_time = current_time
 
     # Drawing
-    drawGrid()
-    drawPieces()
+    draw_grid()
+    draw_pieces()
 
     # Flip the display
     pygame.display.flip()
