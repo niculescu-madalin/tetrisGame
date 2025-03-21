@@ -18,11 +18,3 @@ GREEN = pygame.Color(50, 205, 50)  # S
 PURPLE = pygame.Color(139, 0, 139)  # T
 RED = pygame.Color(178, 34, 34)  # Z
 
-# Preview Tetrimino color
-CYAN_ALPHA = pygame.Color(0, 191, 255, a=125)  # I
-BLUE_ALPHA = pygame.Color(114, 60, 210, a=125)  # J
-ORANGE_ALPHA = pygame.Color(255, 127, 80, a=125)  # L
-YELLOW_ALPHA = pygame.Color(255, 215, 0, a=125)  # O
-GREEN_ALPHA = pygame.Color(50, 205, 50, a=125)  # S
-PURPLE_ALPHA = pygame.Color(139, 0, 139, a=125)  # T
-RED_ALPHA = pygame.Color(178, 34, 34, a=125)  # Z
