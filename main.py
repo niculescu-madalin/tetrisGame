@@ -143,14 +143,12 @@ def clear_lines():
 
 
 def hold():
-    global hold_piece, current_piece, piece_y, piece_x, piece_rotation, game_over
+    global hold_piece, current_piece, piece_rotation, game_over
     if not hold_piece:
         hold_piece = current_piece
         new_piece()
     else:
         current_piece, hold_piece = hold_piece, current_piece
-        piece_x = GRID_COLS // 2 - 1
-        piece_y = 0
         piece_rotation = 0
         if check_collision(piece_x, piece_y, piece_rotation):
             game_over = True
@@ -225,6 +223,7 @@ def draw_hold_piece():
             BLOCK_SIZE - BLOCK_GAP,
             BLOCK_SIZE - BLOCK_GAP
         ))
+
 
 def draw_next_pieces_preview():
     y_offset = PLAY_OFFSET_Y + BLOCK_GAP + 64
