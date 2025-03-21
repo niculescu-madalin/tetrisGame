@@ -25,10 +25,8 @@ MOVEMENT_DELAY = 6
 # Game states
 MENU = 0
 PLAYING = 1
-PAUSED = 2
-GAME_OVER = 3
+HOW_TO_PLAY = 2
 
-# Game state
 grid = [[0 for _ in range(GRID_COLS)] for _ in range(GRID_ROWS)]
 
 current_bag = []
@@ -289,7 +287,7 @@ def draw_pause_menu():
     text = font.render('Press P to Resume', True, colors.WHITE)
     text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50))
     screen.blit(text, text_rect)
-    text = font.render('Press ESC to Quit', True, colors.WHITE)
+    text = font.render('Press ESC to Main Menu', True, colors.WHITE)
     text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100))
     screen.blit(text, text_rect)
 
@@ -306,24 +304,50 @@ def draw_game_over():
     text = font.render(f'Score: {score}', True, colors.WHITE)
     text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50))
     screen.blit(text, text_rect)
-    text = font.render('Press ESC to Quit', True, colors.WHITE)
+
+    text = font.render('Press R to Reset Game', True, colors.WHITE)
     text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100))
+    screen.blit(text, text_rect)
+
+    text = font.render('Press ESC to Main Menu', True, colors.WHITE)
+    text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 150))
     screen.blit(text, text_rect)
 
 
 def draw_main_menu():
     screen.fill(colors.BLACK)
-    font = pygame.font.Font(None, 100)
+    font = pygame.font.Font('Pixica-Bold.ttf', 100)
     title = font.render('TETRIS', True, colors.CYAN)
     title_rect = title.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//4))
     screen.blit(title, title_rect)
 
-    font = pygame.font.Font(None, 50)
+    font = pygame.font.Font('Pixica-Regular.ttf', 50)
     menu_options = ["Start Game", "How to Play", "Quit"]
     for i, option in enumerate(menu_options):
         color = colors.WHITE if i == menu_selection else colors.GRAY
         text = font.render(option, True, color)
         text_rect = text.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2 + i*60))
+        screen.blit(text, text_rect)
+
+
+def draw_instructions():
+    screen.fill(colors.BLACK)
+    font = pygame.font.Font('Pixica-Regular.ttf', 32)
+    lines = [
+        "Controls:",
+        "Left/Right Arrow - Move piece",
+        "Up Arrow - Rotate piece",
+        "Down Arrow - Soft drop",
+        "Space - Hard drop",
+        "P - Pause/Unpause",
+        "ESC - Quit to menu",
+        "",
+        "Press Q, ESC or ENTER to return to main menu"
+    ]
+
+    for i, line in enumerate(lines):
+        text = font.render(line, True,colors.WHITE)
+        text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, 100 + i * 40))
         screen.blit(text, text_rect)
 
 
@@ -353,6 +377,7 @@ def reset_game():
     global hold_piece, current_piece, piece_x, piece_y, piece_rotation
     global score, game_state
     global current_bag, next_bag
+    global paused, game_over
 
     grid = [[0 for _ in range(GRID_COLS)] for _ in range(GRID_ROWS)]
 
@@ -368,6 +393,9 @@ def reset_game():
     current_bag = []
     next_bag = shapes.SHAPES[:]
     random.shuffle(next_bag)
+
+    paused = False
+    game_over = False
 
     new_piece()
 
@@ -386,7 +414,6 @@ while running:
             running = False
 
         if event.type == pygame.KEYDOWN:
-
             if game_state == MENU:
                 if event.key == pygame.K_DOWN:
                     menu_selection = (menu_selection + 1) % 3
@@ -396,14 +423,20 @@ while running:
                     if menu_selection == 0:  # Start Game
                         reset_game()
                     elif menu_selection == 1:  # How to Play
-                        game_state = 4  # Temporary state for instructions
+                        game_state = HOW_TO_PLAY
                     elif menu_selection == 2:  # Quit
                         running = False
+
             elif game_state == PLAYING:
-                if event.key == pygame.K_ESCAPE:
-                    running = False
-                elif not game_over:
-                    if event.key == pygame.K_p:
+                if not game_over:
+                    if paused:
+                        if event.key == pygame.K_ESCAPE:
+                            game_state = MENU
+                        if event.key == pygame.K_p:
+                            paused = not paused
+                    elif event.key == pygame.K_ESCAPE:
+                        paused = not paused
+                    elif event.key == pygame.K_p:
                         paused = not paused
                     elif event.key == pygame.K_SPACE:
                         drop()
@@ -417,58 +450,70 @@ while running:
                         rotate()
                     elif event.key == K_c:
                         hold()
+                else:
+                    if event.key == pygame.K_r:
+                        reset_game()
+                    elif event.key == pygame.K_ESCAPE:
+                        game_state = MENU
 
-    # Movement
+            elif game_state == HOW_TO_PLAY:
+                if event.key == (pygame.K_q or pygame.K_ESCAPE or pygame.K_RETURN):
+                    game_state = MENU
 
-    if not game_over:
-        if keys[K_LEFT]:
-            left_duration = left_duration + 1
-        else:
-            left_duration = 0
-
-        if keys[K_RIGHT]:
-            right_duration = right_duration + 1
-        else:
-            right_duration = 0
-
-        if keys[K_DOWN]:
-            down_duration = down_duration + 1
-        else:
-            down_duration = 0
-
-        if left_duration == MOVEMENT_DELAY:
-            left_duration = 0
-            move(-1, 0)
-
-        if right_duration == MOVEMENT_DELAY:
-            right_duration = 0
-            move(1, 0)
-
-        if down_duration == MOVEMENT_DELAY / 2:
-            down_duration = 0
-            move(0, 1)
-
-    # Game logic
-    if not game_over and not paused:
-        if current_time - fall_time >= fall_speed:
-            if not move(0, 1):
-                lock_piece()
-            fall_time = current_time
-
-    # Drawing
     if game_state == MENU:
         draw_main_menu()
     elif game_state == PLAYING:
+
+        # Game logic
+        if not game_over and not paused:
+            if current_time - fall_time >= fall_speed:
+                if not move(0, 1):
+                    lock_piece()
+                fall_time = current_time
+
+            # Movement
+            if not game_over:
+                if keys[K_LEFT]:
+                    left_duration = left_duration + 1
+                else:
+                    left_duration = 0
+
+                if keys[K_RIGHT]:
+                    right_duration = right_duration + 1
+                else:
+                    right_duration = 0
+
+                if keys[K_DOWN]:
+                    down_duration = down_duration + 1
+                else:
+                    down_duration = 0
+
+                if left_duration == MOVEMENT_DELAY:
+                    left_duration = 0
+                    move(-1, 0)
+
+                if right_duration == MOVEMENT_DELAY:
+                    right_duration = 0
+                    move(1, 0)
+
+                if down_duration == MOVEMENT_DELAY / 2:
+                    down_duration = 0
+                    move(0, 1)
+
+        # Drawing
         draw_grid()
         draw_pieces()
         draw_next_pieces_preview()
         draw_hold_piece()
         draw_score()
+        if paused:
+            draw_pause_menu()
+        if game_over:
+            draw_game_over()
+    elif game_state == HOW_TO_PLAY:
+        draw_instructions()
 
-    if paused:
-        draw_pause_menu()
-    if game_over:
-        draw_game_over()
+
 
     # Flip the display
     pygame.display.flip()
