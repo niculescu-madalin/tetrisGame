@@ -4,8 +4,6 @@ import shapes
 
 from rendering import *
 
-pygame.init()
-
 
 def new_bag():
     global current_bag, next_bag
@@ -138,8 +136,19 @@ def draw_pieces():
                 ))
 
 
+pygame.init()
+
 # create screen
 screen = init_screen()
+# initialize clock
+clock = pygame.time.Clock()
+
+game_state = MENU
+menu_selection = 0
+paused = False
+game_over = False
+
+score = 0
 
 grid = [[0 for _ in range(GRID_COLS)] for _ in range(GRID_ROWS)]
 
@@ -148,28 +157,17 @@ next_bag = shapes.SHAPES[:]
 random.shuffle(next_bag)
 
 current_piece = None
+hold_piece = None
 piece_x = 0
 piece_y = 0
 piece_rotation = 0
 
-hold_piece = None
-
-score = 0
-paused = False
-game_over = False
-
 fall_time = 0
 fall_speed = 500
-
-# initialize clock
-clock = pygame.time.Clock()
 
 left_duration = 0
 right_duration = 0
 down_duration = 0
-
-game_state = MENU
-menu_selection = 0
 
 running = True
 
