@@ -1,4 +1,3 @@
-import pygame
 import colors
 from constants import *
 from colors import *
@@ -196,8 +195,8 @@ def draw_instructions(screen):
         "Up Arrow - Rotate piece",
         "Down Arrow - Soft drop",
         "Space - Hard drop",
-        "P - Pause/Unpause",
-        "ESC - Quit to menu",
+        "P or ESC - Pause Menu",
+        "",
         "",
         "Press Q, ESC or ENTER to return to main menu"
     ]

@@ -2,10 +2,10 @@ import random
 from pygame.locals import *
 import shapes
 
-from constants import SCREEN_WIDTH, SCREEN_HEIGHT
 from rendering import *
 
 pygame.init()
+
 
 def new_bag():
     global current_bag, next_bag
