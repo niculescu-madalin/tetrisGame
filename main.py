@@ -207,7 +207,7 @@ def draw_hold_piece():
     y_offset = PLAY_OFFSET_Y + BLOCK_GAP + 64
     x_offset = PLAY_OFFSET_X - BLOCK_GAP - BLOCK_SIZE * 3
 
-    font = pygame.font.Font('Pixica-Bold.ttf', 64)
+    font = pygame.font.Font('assets/Pixica-Bold.ttf', 64)
     text = font.render('Hold', True, colors.WHITE)
     screen.blit(text, (
         x_offset - BLOCK_SIZE,
@@ -234,7 +234,7 @@ def draw_next_pieces_preview():
     y_offset = PLAY_OFFSET_Y + BLOCK_GAP + 64
     x_offset = PLAY_OFFSET_X + PLAY_WIDTH + BLOCK_GAP + BLOCK_SIZE * 2
 
-    font = pygame.font.Font('Pixica-Bold.ttf', 64)
+    font = pygame.font.Font('assets/Pixica-Bold.ttf', 64)
     text = font.render('Next', True, colors.WHITE)
     screen.blit(text, (
         x_offset - BLOCK_SIZE,
@@ -267,7 +267,7 @@ def draw_score():
     y_offset = PLAY_OFFSET_Y + PLAY_HEIGHT - 32
     x_offset = PLAY_OFFSET_X + PLAY_WIDTH + BLOCK_SIZE
 
-    font = pygame.font.Font('Pixica-Regular.ttf', 32)
+    font = pygame.font.Font('assets/Pixica-Regular.ttf', 32)
     text = font.render('Score: ' + str(score), True, colors.WHITE)
     screen.blit(text, (
         x_offset,
@@ -279,11 +279,11 @@ def draw_pause_menu():
     overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
     overlay.fill((0, 0, 0, 128))
     screen.blit(overlay, (0, 0))
-    font = pygame.font.Font('Pixica-Bold.ttf', 74)
+    font = pygame.font.Font('assets/Pixica-Bold.ttf', 74)
     text = font.render('PAUSED', True, colors.WHITE)
     text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50))
     screen.blit(text, text_rect)
-    font = pygame.font.Font('Pixica-Regular.ttf', 36)
+    font = pygame.font.Font('assets/Pixica-Regular.ttf', 36)
     text = font.render('Press P to Resume', True, colors.WHITE)
     text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50))
     screen.blit(text, text_rect)
@@ -296,11 +296,11 @@ def draw_game_over():
     overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
     overlay.fill((0, 0, 0, 128))
     screen.blit(overlay, (0, 0))
-    font = pygame.font.Font('Pixica-Bold.ttf', 74)
+    font = pygame.font.Font('assets/Pixica-Bold.ttf', 74)
     text = font.render('GAME OVER', True, colors.RED)
     text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50))
     screen.blit(text, text_rect)
-    font = pygame.font.Font('Pixica-Regular.ttf', 36)
+    font = pygame.font.Font('assets/Pixica-Regular.ttf', 36)
     text = font.render(f'Score: {score}', True, colors.WHITE)
     text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50))
     screen.blit(text, text_rect)
@@ -316,12 +316,12 @@ def draw_game_over():
 
 def draw_main_menu():
     screen.fill(colors.BLACK)
-    font = pygame.font.Font('Pixica-Bold.ttf', 100)
+    font = pygame.font.Font('assets/Pixica-Bold.ttf', 100)
     title = font.render('TETRIS', True, colors.CYAN)
     title_rect = title.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//4))
     screen.blit(title, title_rect)
 
-    font = pygame.font.Font('Pixica-Regular.ttf', 50)
+    font = pygame.font.Font('assets/Pixica-Regular.ttf', 50)
     menu_options = ["Start Game", "How to Play", "Quit"]
     for i, option in enumerate(menu_options):
         color = colors.WHITE if i == menu_selection else colors.GRAY
@@ -332,7 +332,7 @@ def draw_main_menu():
 
 def draw_instructions():
     screen.fill(colors.BLACK)
-    font = pygame.font.Font('Pixica-Regular.ttf', 32)
+    font = pygame.font.Font('assets/Pixica-Regular.ttf', 32)
     lines = [
         "Controls:",
         "Left/Right Arrow - Move piece",
@@ -468,7 +468,6 @@ while running:
     if game_state == MENU:
         draw_main_menu()
     elif game_state == PLAYING:
-
         # Game logic
         if not game_over and not paused:
             if current_time - fall_time >= fall_speed:
