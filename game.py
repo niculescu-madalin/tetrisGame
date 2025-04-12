@@ -7,7 +7,6 @@ class GameState:
     def __init__(self):
         self.game_state = MENU
         self.menu_selection = 0
-
         self.grid = [[0 for _ in range(GRID_COLS)] for _ in range(GRID_ROWS)]
         self.current_bag = []
         self.next_bag = SHAPES[:]

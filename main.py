@@ -3,7 +3,7 @@ from pygame.locals import *
 import shapes
 
 from rendering import *
-
+from controls import *
 
 def new_bag():
     global current_bag, next_bag
@@ -138,6 +138,31 @@ def draw_pieces():
 
 pygame.init()
 
+# Initialize controllers
+pygame.joystick.init()
+if pygame.joystick.get_count() > 0:
+    controller = pygame.joystick.Joystick(0)
+    controller.init()
+else:
+    controller = None
+
+
+print(controller)
+if controller.get_numhats() > 0:
+    print("D-Pad is available")
+
+
+BUTTON_A = 0        # Drop
+BUTTON_B = 1        # Rotate
+BUTTON_X = 2        # Hold
+BUTTON_Y = 3        # Pause
+BUTTON_START = 7    # Start/Menu
+BUTTON_BACK = 6     # Back/Menu
+
+AXIS_LEFT_X = 0
+AXIS_LEFT_Y = 1
+
+
 # create screen
 screen = init_screen()
 # initialize clock
@@ -213,7 +238,7 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-        if event.type == pygame.KEYDOWN:
+        elif event.type == pygame.KEYDOWN:
             if game_state == MENU:
                 if event.key == pygame.K_DOWN:
                     menu_selection = (menu_selection + 1) % 3
@@ -264,6 +289,71 @@ while running:
                 elif event.key == pygame.K_RETURN:
                     game_state = MENU
 
+        elif event.type == pygame.JOYHATMOTION:
+            hat_x, hat_y = event.value
+            if game_state == MENU:
+                if hat_y == 1:
+                    menu_selection = (menu_selection - 1) % 3
+                if hat_y == -1:
+                    menu_selection = (menu_selection + 1) % 3
+
+            elif game_state == PLAYING and not paused and not game_over:
+                if hat_x == -1:
+                    move(-1, 0)
+                elif hat_x == 1:
+                    move(1, 0)
+
+                if hat_y == -1:  # D-pad down
+                    move(0, 1)
+                elif hat_y == 1:  # D-pad up = rotate
+                    rotate()
+
+        # Controller button press
+        elif event.type == pygame.JOYBUTTONDOWN:
+            if game_state == MENU:
+                if event.button == BUTTON_B:
+                    if menu_selection == 0:
+                        reset_game()
+                    elif menu_selection == 1:
+                        game_state = HOW_TO_PLAY
+                    elif menu_selection == 2:
+                        running = False
+
+            elif game_state == PLAYING:
+                if not game_over:
+                    if paused:
+                        if event.button == BUTTON_Y:
+                            paused = not paused
+                    else:
+                        if event.button == BUTTON_Y:
+                            paused = not paused
+                        elif event.button == BUTTON_A:
+                            drop()
+                        elif event.button == BUTTON_B:
+                            rotate()
+                        elif event.button == BUTTON_X:
+                            hold()
+                else:
+                    if event.button == BUTTON_BACK:
+                        game_state = MENU
+                    elif event.button == BUTTON_A:
+                        reset_game()
+
+            elif game_state == HOW_TO_PLAY:
+                if event.button in [BUTTON_BACK, BUTTON_Y, BUTTON_A]:
+                    game_state = MENU
+
+        # Optional: Controller axis motion for movement
+        elif event.type == pygame.JOYAXISMOTION:
+            if game_state == PLAYING and not paused and not game_over:
+                if event.axis == AXIS_LEFT_X:
+                    if event.value < -0.5:
+                        move(-1, 0)
+                    elif event.value > 0.5:
+                        move(1, 0)
+                elif event.axis == AXIS_LEFT_Y:
+                    if event.value > 0.5:
+                        move(0, 1)
 
     if game_state == MENU:
         draw_main_menu(screen, menu_selection)
@@ -303,6 +393,8 @@ while running:
                 if down_duration == MOVEMENT_DELAY / 2:
                     down_duration = 0
                     move(0, 1)
+
+
 
         # Drawing
         draw_grid(screen, grid)
