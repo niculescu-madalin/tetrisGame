@@ -366,33 +366,32 @@ while running:
                 fall_time = current_time
 
             # Movement
-            if not game_over:
-                if keys[K_LEFT]:
-                    left_duration = left_duration + 1
-                else:
-                    left_duration = 0
+            if keys[K_LEFT]:
+                left_duration = left_duration + 1
+            else:
+                left_duration = 0
 
-                if keys[K_RIGHT]:
-                    right_duration = right_duration + 1
-                else:
-                    right_duration = 0
+            if keys[K_RIGHT]:
+                right_duration = right_duration + 1
+            else:
+                right_duration = 0
 
-                if keys[K_DOWN]:
-                    down_duration = down_duration + 1
-                else:
-                    down_duration = 0
+            if keys[K_DOWN]:
+                down_duration = down_duration + 1
+            else:
+                down_duration = 0
 
-                if left_duration == MOVEMENT_DELAY:
-                    left_duration = 0
-                    move(-1, 0)
+            if left_duration == MOVEMENT_DELAY:
+                left_duration = 0
+                move(-1, 0)
 
-                if right_duration == MOVEMENT_DELAY:
-                    right_duration = 0
-                    move(1, 0)
+            if right_duration == MOVEMENT_DELAY:
+                right_duration = 0
+                move(1, 0)
 
-                if down_duration == MOVEMENT_DELAY / 2:
-                    down_duration = 0
-                    move(0, 1)
+            if down_duration == MOVEMENT_DELAY / 2:
+                down_duration = 0
+                move(0, 1)
 
 
 
