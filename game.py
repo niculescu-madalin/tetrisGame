@@ -125,4 +125,48 @@ class GameState:
                 self.game_over = True
 
     def reset(self):
+        """Reset the game state to start a new game."""
         self.__init__()
+        self.game_state = PLAYING
+
+
+def new_bag(current_bag, next_bag):
+    current_bag = next_bag
+    next_bag = SHAPES[:]
+    random.shuffle(next_bag)
+    return current_bag, next_bag
+
+
+def new_piece(current_bag, next_bag, grid, GRID_COLS, GRID_ROWS):
+    if not len(current_bag):
+        current_bag, next_bag = new_bag(current_bag, next_bag)
+
+    current_piece = current_bag.pop()
+    piece_rotation = 0
+    piece_x = GRID_COLS // 2 - 1
+    piece_y = 0
+
+    if check_collision(current_piece, piece_x, piece_y, piece_rotation, grid, GRID_COLS, GRID_ROWS):
+        return None, current_bag, next_bag, True  # Game over
+
+    return {
+        'piece': current_piece,
+        'x': piece_x,
+        'y': piece_y,
+        'rotation': piece_rotation
+    }, current_bag, next_bag, False
+
+
+def check_collision(piece, x, y, rotation, grid, GRID_COLS, GRID_ROWS):
+    if piece is None:
+        return True
+
+    shape = piece['rotations'][rotation]
+    for dx, dy in shape:
+        new_x = x + dx
+        new_y = y + dy
+        if new_x < 0 or new_x >= GRID_COLS or new_y >= GRID_ROWS:
+            return True
+        if new_y >= 0 and grid[new_y][new_x]:
+            return True
+    return False

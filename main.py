@@ -5,6 +5,7 @@ import shapes
 from rendering import *
 from controls import *
 
+
 def new_bag():
     global current_bag, next_bag
     current_bag = next_bag
@@ -392,8 +393,6 @@ while running:
             if down_duration == MOVEMENT_DELAY / 2:
                 down_duration = 0
                 move(0, 1)
-
-
 
         # Drawing
         draw_grid(screen, grid)
