@@ -148,11 +148,6 @@ else:
     controller = None
 
 
-print(controller)
-if controller.get_numhats() > 0:
-    print("D-Pad is available")
-
-
 BUTTON_A = 0        # Drop
 BUTTON_B = 1        # Rotate
 BUTTON_X = 2        # Hold
@@ -319,13 +314,28 @@ while running:
                         game_state = HOW_TO_PLAY
                     elif menu_selection == 2:
                         running = False
+                if event.button == BUTTON_A:
+                    if menu_selection == 0:
+                        reset_game()
+                    elif menu_selection == 1:
+                        game_state = HOW_TO_PLAY
+                    elif menu_selection == 2:
+                        running = False
 
             elif game_state == PLAYING:
                 if not game_over:
                     if paused:
                         if event.button == BUTTON_Y:
                             paused = not paused
+                        if event.button == BUTTON_START:
+                            game_state = MENU
+                        if event.button == BUTTON_BACK:
+                            game_state = MENU
                     else:
+                        if event.button == BUTTON_START:
+                            paused = not paused
+                        if event.button == BUTTON_BACK:
+                            paused = not paused
                         if event.button == BUTTON_Y:
                             paused = not paused
                         elif event.button == BUTTON_A:
@@ -336,6 +346,8 @@ while running:
                             hold()
                 else:
                     if event.button == BUTTON_BACK:
+                        game_state = MENU
+                    if event.button == BUTTON_START:
                         game_state = MENU
                     elif event.button == BUTTON_A:
                         reset_game()
@@ -401,9 +413,9 @@ while running:
         draw_hold_piece(screen, hold_piece)
         draw_score(screen, score)
         if paused:
-            draw_pause_menu(screen)
+            draw_pause_menu(screen, controller)
         if game_over:
-            draw_game_over(screen, score)
+            draw_game_over(screen, score, controller)
     elif game_state == HOW_TO_PLAY:
         draw_instructions(screen)
 

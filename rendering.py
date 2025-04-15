@@ -126,7 +126,7 @@ def draw_score(screen, score):
     ))
 
 
-def draw_pause_menu(screen):
+def draw_pause_menu(screen, controller):
     overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
     overlay.fill((0, 0, 0, 128))
     screen.blit(overlay, (0, 0))
@@ -137,16 +137,22 @@ def draw_pause_menu(screen):
     screen.blit(text, text_rect)
 
     font = pygame.font.Font('assets/Pixica-Regular.ttf', 36)
-    text = font.render('Press P to Resume', True, WHITE)
+    if controller:
+        text = font.render('Press (Y) to Resume', True, WHITE)
+    else:
+        text = font.render('Press P to Resume', True, WHITE)
     text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50))
     screen.blit(text, text_rect)
 
-    text = font.render('Press ESC to Main Menu', True, WHITE)
+    if controller:
+        text = font.render('Press (=) to Main Menu', True, WHITE)
+    else:
+        text = font.render('Press ESC to Main Menu', True, WHITE)
     text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100))
     screen.blit(text, text_rect)
 
 
-def draw_game_over(screen, score):
+def draw_game_over(screen, score, controller):
     overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
     overlay.fill((0, 0, 0, 128))
     screen.blit(overlay, (0, 0))
@@ -161,11 +167,17 @@ def draw_game_over(screen, score):
     text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50))
     screen.blit(text, text_rect)
 
-    text = font.render('Press R to Reset Game', True, WHITE)
+    if controller:
+        text = font.render('Press (A) to Reset Game', True, WHITE)
+    else:
+        text = font.render('Press R to Reset Game', True, WHITE)
     text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100))
     screen.blit(text, text_rect)
 
-    text = font.render('Press ESC to Main Menu', True, WHITE)
+    if controller:
+        text = font.render('Press (=) to Main Menu', True, WHITE)
+    else:
+        text = font.render('Press ESC to Main Menu', True, WHITE)
     text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 150))
     screen.blit(text, text_rect)
 
@@ -191,11 +203,12 @@ def draw_instructions(screen):
     font = pygame.font.Font('assets/Pixica-Regular.ttf', 32)
     lines = [
         "Controls:",
-        "Left/Right Arrow - Move piece",
-        "Up Arrow - Rotate piece",
-        "Down Arrow - Soft drop",
-        "Space - Hard drop",
-        "P or ESC - Pause Menu",
+        "Move piece: Left/Right Arrow, D-pad, Joysticks",
+        "Rotate piece: Up Arrow, Up D-pad, (B)",
+        "Hold piece: C, (X)"
+        "Soft drop: Down Arrow, Down D-pad, Down Joysticks",
+        "Hard drop: Space, (A)",
+        "Pause Menu: P, ESC, (Y), (=)",
         "",
         "",
         "Press Q, ESC or ENTER to return to main menu"
