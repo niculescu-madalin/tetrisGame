@@ -210,8 +210,7 @@ def draw_instructions(screen):
         "Hard drop: Space, (A)",
         "Pause Menu: P, ESC, (Y), (=)",
         "",
-        "",
-        "Press Q, ESC or ENTER to return to main menu"
+        "Press Q, ESC, ENTER, (A) or (Y) to return to main menu"
     ]
 
     for i, line in enumerate(lines):
