@@ -3,10 +3,10 @@ from pygame.locals import *
 import shapes
 
 from rendering import *
-from controls import *
 
 
 def new_bag():
+    """Get a new bag"""
     global current_bag, next_bag
     current_bag = next_bag
     next_bag = shapes.SHAPES[:]
@@ -14,6 +14,7 @@ def new_bag():
 
 
 def new_piece():
+    """ Get a new piece, if there is no more space on the grid then update game over"""
     global current_piece, piece_y, piece_x, piece_rotation, game_over
 
     if not len(current_bag):
@@ -29,6 +30,7 @@ def new_piece():
 
 
 def check_collision(x, y, rotation) -> bool:
+    """ Check collision """
     if current_piece is None or paused or game_over:
         return True
     shape = current_piece['rotations'][rotation]
@@ -43,6 +45,7 @@ def check_collision(x, y, rotation) -> bool:
 
 
 def move(dx, dy):
+    """ Move a piece """
     global piece_x, piece_y
     if current_piece is None or paused or game_over:
         return False
@@ -56,6 +59,7 @@ def move(dx, dy):
 
 
 def rotate():
+    """ Rotate a piece """
     global piece_x, piece_y, piece_rotation
     if current_piece is None or paused or game_over:
         return
@@ -82,6 +86,7 @@ def drop():
 
 
 def lock_piece():
+    """Lock a piece to the grid """
     global score
     if current_piece is None:
         return
@@ -99,6 +104,7 @@ def lock_piece():
 
 
 def clear_lines():
+    """ Clear lines and return how many are cleared"""
     lines_cleared = 0
     for y in range(GRID_ROWS - 1, -1, -1):
         if all(grid[y][x] != 0 for x in range(GRID_COLS)):
@@ -109,6 +115,7 @@ def clear_lines():
 
 
 def hold():
+    """Hold a piece"""
     global hold_piece, current_piece, piece_rotation, game_over
     if not hold_piece:
         hold_piece = current_piece
@@ -121,6 +128,7 @@ def hold():
 
 
 def draw_pieces():
+    """Draw new pieces """
     if current_piece and not game_over:
         color = current_piece['color']
         shape = current_piece['rotations'][piece_rotation]
@@ -194,6 +202,7 @@ running = True
 
 
 def reset_game():
+    """Reset the game"""
     global grid
     global hold_piece, current_piece, piece_x, piece_y, piece_rotation
     global score, game_state
@@ -356,7 +365,7 @@ while running:
                 if event.button in [BUTTON_BACK, BUTTON_Y, BUTTON_A]:
                     game_state = MENU
 
-        # Optional: Controller axis motion for movement
+        # Controller axis motion for movement
         elif event.type == pygame.JOYAXISMOTION:
             if game_state == PLAYING and not paused and not game_over:
                 if event.axis == AXIS_LEFT_X:
